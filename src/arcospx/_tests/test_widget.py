@@ -15,9 +15,9 @@ def test_remove_background(make_napari_viewer, qtbot):
     Test background removal on a simple image.
     """
     viewer = make_napari_viewer()
-    test_img = imread('test_data/1_growing.tif')
+    test_img = imread('src/arcospx/_tests/test_data/1_growing.tif')
     viewer.add_image(test_img, name='test_img')
-    true_img = imread('test_data/1_growing_true.tif')
+    true_img = imread('src/arcospx/_tests/test_data/1_growing_true.tif')
     _,widget = viewer.window.add_plugin_dock_widget("arcosPx-napari", "Remove Background")
     widget.image.value = viewer.layers['test_img']
     widget.filter_type.value = "gaussian"
@@ -35,9 +35,9 @@ def test_track_events(make_napari_viewer, qtbot):
     Test tracking on a simple image.
     """
     viewer = make_napari_viewer()
-    test_img = imread('test_data/test_data_track_events.tif')
+    test_img = imread('src/arcospx/_tests/test_data/test_data_track_events.tif')
     viewer.add_image(test_img, name='test_img')
-    true_img = imread('test_data/test_track_events_true.tif')
+    true_img = imread('src/arcospx/_tests/test_data/test_track_events_true.tif')
     _, widget = viewer.window.add_plugin_dock_widget("arcosPx-napari", "Track Events")
     widget.image_selector.value = viewer.layers['test_img']
     widget.threshold.value = 300
