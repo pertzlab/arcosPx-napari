@@ -1,6 +1,7 @@
+import numpy as np
 from numpy.testing import assert_array_equal
 from skimage.io import imread
-import numpy as np
+
 
 def test_remove_background(make_napari_viewer, qtbot):
     """
@@ -19,8 +20,8 @@ def test_remove_background(make_napari_viewer, qtbot):
     widget.size_1.value = 1
     widget.size_2.value = 1
 
-    with qtbot.waitSignal(viewer.layers.events.inserted, timeout=20000):
-        worker = widget()
+    with qtbot.waitSignal(viewer.layers.events.inserted, timeout=10000):
+        widget()
 
     assert_array_equal(viewer.layers[1].data, true_img)
 
@@ -30,11 +31,17 @@ def test_track_events(make_napari_viewer, qtbot):
     Test tracking on a simple image.
     """
     viewer = make_napari_viewer()
-    test_img = np.where(imread('src/arcospx/_tests/test_data/1_growing.tif') == 0, 2, 0)
-    viewer.add_image(test_img, name='test_img')
-    true_img = imread('src/arcospx/_tests/test_data/1_growing_track_events_true.tif')
-    _, widget = viewer.window.add_plugin_dock_widget("arcosPx-napari", "Track Events")
-    widget.image_selector.value = viewer.layers['test_img']
+    test_img = np.where(
+        imread("src/arcospx/_tests/test_data/1_growing.tif") == 0, 2, 0
+    )
+    viewer.add_image(test_img, name="test_img")
+    true_img = imread(
+        "src/arcospx/_tests/test_data/1_growing_track_events_true.tif"
+    )
+    _, widget = viewer.window.add_plugin_dock_widget(
+        "arcosPx-napari", "Track Events"
+    )
+    widget.image_selector.value = viewer.layers["test_img"]
     widget.threshold.value = 1
     widget.eps.value = 1
     widget.epsPrev.value = 1
@@ -43,6 +50,6 @@ def test_track_events(make_napari_viewer, qtbot):
     widget.nPrev.value = 1
 
     with qtbot.waitSignal(viewer.layers.events.inserted, timeout=10000):
-        worker = widget()
+        widget()
 
     assert_array_equal(viewer.layers[1].data, true_img)
