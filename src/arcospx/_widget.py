@@ -8,7 +8,7 @@ Replace code below according to your needs.
 """
 from typing import TYPE_CHECKING, Literal
 
-from arcos4py.tools import remove_image_background, track_events_image
+from arcos4py.tools import track_events_image
 from magicgui import magic_factory
 from napari.layers import Image
 from napari.qt.threading import FunctionWorker, thread_worker
@@ -37,7 +37,6 @@ def remove_background(
     dims: str = "TXY",
     crop_time_axis: bool = False,
 ) -> FunctionWorker[LayerDataTuple]:
-    size = (size_0, size_1, size_2)
     pbar = progress(total=0)
 
     @thread_worker(connect={"returned": pbar.close})
@@ -47,9 +46,12 @@ def remove_background(
         # Reset the abort flag at the start of each execution
         abort_flag = False
 
-        removed_background = remove_image_background(
-            image.data, filter_type, size, dims, crop_time_axis
-        )
+        selected_image = image.data
+        # removed_background = remove_image_background(
+        #     image=selected_image, filter_type=filter_type, size=size, dims=dims, crop_time_axis=crop_time_axis
+        # )
+
+        removed_background = selected_image
 
         if abort_flag:
             pbar.close()
