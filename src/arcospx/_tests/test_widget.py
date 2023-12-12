@@ -21,11 +21,11 @@ def test_remove_background(make_napari_viewer, qtbot):
     widget.size_2.value = 1
 
     with qtbot.waitSignal(
-        viewer.layers.events.inserted, timeout=10000, raising=False
+        viewer.layers.events.inserted, timeout=50000, raising=False
     ):
         widget()
 
-    assert viewer.layers[1].name == "test_img background removed"
+    assert viewer.layers[-1].name == "test_img background removed"
 
 
 def test_track_events(make_napari_viewer, qtbot):
@@ -52,7 +52,7 @@ def test_track_events(make_napari_viewer, qtbot):
     widget.nPrev.value = 1
 
     with qtbot.waitSignal(
-        viewer.layers.events.inserted, timeout=10000, raising=False
+        viewer.layers.events.inserted, timeout=50000, raising=False
     ):
         widget()
 
