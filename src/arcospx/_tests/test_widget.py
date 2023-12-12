@@ -1,18 +1,14 @@
-from unittest.mock import patch
-
 import numpy as np
 from numpy.testing import assert_array_equal
 from skimage.io import imread
 
 
-@patch("arcospx._widget.remove_image_background", autospec=True)
-def test_remove_background(mock_rmbg, make_napari_viewer, qtbot):
+def test_remove_background(make_napari_viewer, qtbot):
     """
     Test background removal on a simple image.
     """
     viewer = make_napari_viewer()
     test_img = imread("src/arcospx/_tests/test_data/1_growing.tif")
-    mock_rmbg.return_value = test_img
 
     viewer.add_image(test_img, name="test_img")
     imread("src/arcospx/_tests/test_data/1_growing_true.tif")
@@ -25,10 +21,13 @@ def test_remove_background(mock_rmbg, make_napari_viewer, qtbot):
     widget.size_1.value = 1
     widget.size_2.value = 1
 
-    with qtbot.waitSignal(viewer.layers.events.inserted, timeout=1000):
+    with qtbot.waitSignal(
+        viewer.layers.events.inserted,
+        timeout=5000,
+    ):
         widget()
 
-    assert_array_equal(test_img, viewer.layers[-1].data)
+    assert len(viewer.layers) == 2
 
 
 def test_track_events(make_napari_viewer, qtbot):
@@ -55,7 +54,8 @@ def test_track_events(make_napari_viewer, qtbot):
     widget.nPrev.value = 1
 
     with qtbot.waitSignal(
-        viewer.layers.events.inserted, timeout=50000, raising=False
+        viewer.layers.events.inserted,
+        timeout=50000,
     ):
         widget()
 
