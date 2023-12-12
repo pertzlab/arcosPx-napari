@@ -2,8 +2,7 @@ name: arcosPx-napari
 display_name: arcosPx
 # use 'hidden' to remove plugin from napari hub search results
 visibility: public
-# see https://napari.org/stable/plugins/manifest.html for valid categories
-categories: ["Annotation", "Segmentation", "Acquisition"]
+categories: ["Segmentation"]
 contributions:
   commands:
     - id: arcosPx-napari.remove_background
@@ -15,10 +14,6 @@ contributions:
     - id: arcosPx-napari.abort_process
       python_name: arcospx._widget:abort_process
       title: Abort Process
-  sample_data:
-    - command: arcosPx-napari.make_sample_data
-      display_name: arcosPx
-      key: unique_id.1
   widgets:
     - command: arcosPx-napari.remove_background
       display_name: Remove Background
