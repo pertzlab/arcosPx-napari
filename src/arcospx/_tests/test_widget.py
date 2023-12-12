@@ -16,7 +16,7 @@ def test_remove_background(make_napari_viewer, qtbot):
     )
     widget.image.value = viewer.layers["test_img"]
     widget.filter_type.value = "gaussian"
-    widget.size_0.value = 1
+    widget.size_0.value = 2
     widget.size_1.value = 1
     widget.size_2.value = 1
 
