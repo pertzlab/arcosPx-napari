@@ -6,7 +6,8 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 
 Replace code below according to your needs.
 """
-from typing import TYPE_CHECKING, Literal
+from time import sleep
+from typing import Literal
 
 from arcos4py.tools import track_events_image
 from magicgui import magic_factory
@@ -15,14 +16,7 @@ from napari.qt.threading import FunctionWorker, thread_worker
 from napari.types import LayerDataTuple
 from napari.utils import progress
 
-if TYPE_CHECKING:
-    pass
 
-# A global flag for aborting the process
-abort_flag = False
-
-
-# Optional: Define a custom exception for aborting the process
 class AbortException(Exception):
     pass
 
@@ -41,11 +35,6 @@ def remove_background(
 
     @thread_worker(connect={"returned": pbar.close})
     def remove_image_background_2() -> LayerDataTuple:
-        global abort_flag
-
-        # Reset the abort flag at the start of each execution
-        abort_flag = False
-
         selected_image = image.data
         # removed_background = remove_image_background(
         #     image=selected_image, filter_type=filter_type, size=size, dims=dims, crop_time_axis=crop_time_axis
@@ -53,23 +42,8 @@ def remove_background(
 
         removed_background = selected_image
 
-        if abort_flag:
-            pbar.close()
-            raise AbortException("Operation aborted by user.")
-
-        layer_properties = {
-            "name": f"{image.name} background removed",
-            "metadata": {
-                "filter_type": filter_type,
-                "size_0": size_0,
-                "size_1": size_1,
-                "size_2": size_2,
-                "dims": dims,
-                "crop_time_axis": crop_time_axis,
-                "filename": image.name,
-            },
-        }
-
+        layer_properties = {"name": f"{image.name} background removed"}
+        sleep(0.5)
         return (removed_background, layer_properties, "image")
 
     return remove_image_background_2()
