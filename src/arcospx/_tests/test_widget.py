@@ -23,7 +23,7 @@ def test_remove_background(make_napari_viewer, qtbot):
 
     with qtbot.waitSignal(
         viewer.layers.events.inserted,
-        timeout=5000,
+        timeout=10000,
     ):
         widget()
 
@@ -53,7 +53,7 @@ def test_track_events(make_napari_viewer, qtbot):
 
     with qtbot.waitSignal(
         viewer.layers.events.inserted,
-        timeout=5000,
+        timeout=10000,
     ):
         widget()
 

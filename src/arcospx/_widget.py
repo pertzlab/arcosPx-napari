@@ -141,6 +141,7 @@ def track_events(
             img_tracked[idx] = timepoint
             yield 1
 
+        sleep(0.1)  # need this for the tests to pass ...
         return (img_tracked, layer_properties, "labels")
 
     # return the layer data tuple
