@@ -1,7 +1,7 @@
 name: arcosPx-napari
 display_name: arcosPx
 # use 'hidden' to remove plugin from napari hub search results
-visibility: public
+visibility: hidden
 categories: ["Segmentation"]
 contributions:
   commands:
@@ -11,13 +11,13 @@ contributions:
     - id: arcosPx-napari.track_events
       python_name: arcospx._widget:track_events
       title: Track Events
-    - id: arcosPx-napari.abort_process
-      python_name: arcospx._widget:abort_process
-      title: Abort Process
+    - id: arcosPx-napari.simple_thresholder
+      python_name: arcospx._widget:thresholder
+      title: Thresholding
   widgets:
     - command: arcosPx-napari.remove_background
       display_name: Remove Background
+    - command: arcosPx-napari.simple_thresholder
+      display_name: Thresholding
     - command: arcosPx-napari.track_events
       display_name: Track Events
-    - command: arcosPx-napari.abort_process
-      display_name: Abort Current Process

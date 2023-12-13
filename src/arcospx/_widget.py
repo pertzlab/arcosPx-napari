@@ -1,23 +1,22 @@
 """
-This module is an example of a barebones QWidget plugin for napari
-
-It implements the Widget specification.
-see: https://napari.org/stable/plugins/guides.html?#widgets
-
-Replace code below according to your needs.
+This module containst the magic factory widgets for arcospx
 """
 from time import sleep
 from typing import Literal
 
-from arcos4py.tools import track_events_image
+import numpy as np
+from arcos4py.tools import remove_image_background
+from arcos4py.tools._detect_events import ImageTracker, Linker
 from magicgui import magic_factory
 from napari.layers import Image
 from napari.qt.threading import FunctionWorker, thread_worker
 from napari.types import LayerDataTuple
 from napari.utils import progress
+from napari.utils.notifications import show_info
+from skimage.filters import threshold_otsu
 
 
-class AbortException(Exception):
+def do_nothing_function():
     pass
 
 
@@ -31,76 +30,95 @@ def remove_background(
     dims: str = "TXY",
     crop_time_axis: bool = False,
 ) -> FunctionWorker[LayerDataTuple]:
+    size_tuple = (size_0, size_1, size_2)
     pbar = progress(total=0)
 
     @thread_worker(connect={"returned": pbar.close})
     def remove_image_background_2() -> LayerDataTuple:
         selected_image = image.data
-        # removed_background = remove_image_background(
-        #     image=selected_image, filter_type=filter_type, size=size, dims=dims, crop_time_axis=crop_time_axis
-        # )
-
-        removed_background = selected_image
+        removed_background = remove_image_background(
+            image=selected_image,
+            filter_type=filter_type,
+            size=size_tuple,
+            dims=dims,
+            crop_time_axis=crop_time_axis,
+        )
+        removed_background = np.clip(removed_background, 0, None)
 
         layer_properties = {"name": f"{image.name} background removed"}
-        sleep(0.5)
+        sleep(0.1)  # need this for the tests to pass ...
         return (removed_background, layer_properties, "image")
 
     return remove_image_background_2()
 
 
-@magic_factory()
+def _on_thresholder_init(widget):
+    def update_slider(image: Image):
+        # probably don't want to read then throw this array away...
+        # but just an example
+        min_value = np.min(image.data)
+        max_value = np.max(image.data)
+        widget.threshold.max = max_value
+        widget.threshold.min = min_value
+        widget.threshold.value = threshold_otsu(image.data)
+
+    widget.image_selector.changed.connect(update_slider)
+
+
+@magic_factory(
+    auto_call=True,
+    threshold={"widget_type": "FloatSlider", "max": 1},
+    widget_init=_on_thresholder_init,
+)
+def thresholder(
+    image_selector: Image,
+    threshold: float = 0.5,
+) -> LayerDataTuple:
+    binary_image = np.where(image_selector.data > threshold, 1, 0)
+    return (binary_image, {"name": f"{image_selector.name} binary"}, "image")
+
+
+def _on_track_events_init(widget):
+    def _reset_callbutton_name():
+        widget.call_button.text = "Run"
+
+    def _set_widget_worker(funciton_worker):
+        widget.arcos_worker.value = funciton_worker
+        widget.call_button.text = "Abort"
+        widget.arcos_worker.value.finished.connect(_reset_callbutton_name)
+
+    widget.called.connect(_set_widget_worker)
+
+
+@magic_factory(
+    arcos_worker={"visible": False}, widget_init=_on_track_events_init
+)
 def track_events(
     image_selector: Image,
-    threshold: int = 300,
-    eps: int = 10,
-    epsPrev: int = 50,
-    minClSz: int = 50,
-    minSamples: int = 2,
-    nPrev: int = 2,
+    arcos_worker: FunctionWorker | None = None,
+    eps: float = 1.5,
+    epsPrev: float = 0,
+    minClSz: int = 9,
+    nPrev: int = 1,
     dims: str = "TXY",
 ) -> FunctionWorker[LayerDataTuple]:
-    pbar = progress(total=0)
+    if arcos_worker is not None and arcos_worker.is_running:
+        arcos_worker.quit()
+        show_info("Operation aborted by user.")
+        return FunctionWorker(do_nothing_function)
 
-    @thread_worker(connect={"returned": pbar.close})
+    pbar = progress(total=image_selector.data.shape[0])
+
+    @thread_worker(connect={"finished": pbar.close, "yielded": pbar.update})
     def track_events_2() -> LayerDataTuple:
-        global abort_flag
-
-        # Reset the abort flag at the start of each execution
-        abort_flag = False
-
-        if abort_flag:
-            # Return an error message
-            # return "Interrupt error: Operation aborted by user."
-            # Or raise a custom exception
-            pbar.close()
-            raise AbortException("Operation aborted by user.")
+        # Reset the abort flag at the start of each executio
 
         selected_image = image_selector.data
-        img_tracked = track_events_image(
-            selected_image >= threshold,
-            eps=eps,
-            epsPrev=epsPrev,
-            minClSz=minClSz,
-            minSamples=minSamples,
-            nPrev=nPrev,
-            dims=dims,
-        )
+        # Adjust parameters based on dimensionality
 
-        if abort_flag:
-            # Return an error message
-            # return "Interrupt error: Operation aborted by user."
-            # Or raise a custom exception
-            pbar.close()
-            raise AbortException("Operation aborted by user.")
-
-        # Like this we create the layer as a layer-data-tuple object which will automatically be parsed by napari and added to the viewer
-        # This is more flexible and does not require the function to know about the viewer directly
-        # Additionally like this you can now set the metadata of the layer
         layer_properties = {
             "name": f"{image_selector.name} tracked",
             "metadata": {
-                "threshold": threshold,
                 "eps": eps,
                 "epsPrev": epsPrev,
                 "minClSz": minClSz,
@@ -108,13 +126,23 @@ def track_events(
                 "filename": image_selector.name,  ## eg. setting medatada to the name of the image layer
             },
         }
+
+        linker = Linker(
+            eps=eps,
+            epsPrev=epsPrev if epsPrev else None,
+            minClSz=minClSz,
+            nPrev=nPrev,
+            predictor=False,
+        )
+        tracker = ImageTracker(linker)
+        # find indices of T in dims
+        img_tracked = np.zeros_like(selected_image, dtype=np.uint16)
+        for idx, timepoint in enumerate(tracker.track(selected_image, dims)):
+            img_tracked[idx] = timepoint
+            yield 1
+
         return (img_tracked, layer_properties, "labels")
 
     # return the layer data tuple
-    return track_events_2()
-
-
-@magic_factory()
-def abort_process():
-    global abort_flag
-    abort_flag = True
+    arcos_worker = track_events_2()
+    return arcos_worker

@@ -46,16 +46,14 @@ def test_track_events(make_napari_viewer, qtbot):
         "arcosPx-napari", "Track Events"
     )
     widget.image_selector.value = viewer.layers["test_img"]
-    widget.threshold.value = 1
     widget.eps.value = 1
-    widget.epsPrev.value = 1
+    widget.epsPrev.value = 0
     widget.minClSz.value = 1
-    widget.minSamples.value = 1
     widget.nPrev.value = 1
 
     with qtbot.waitSignal(
         viewer.layers.events.inserted,
-        timeout=50000,
+        timeout=5000,
     ):
         widget()
 
