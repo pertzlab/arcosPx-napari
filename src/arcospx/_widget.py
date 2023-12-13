@@ -2,7 +2,7 @@
 This module containst the magic factory widgets for arcospx
 """
 from time import sleep
-from typing import Literal
+from typing import Literal, Union
 
 import numpy as np
 from arcos4py.tools import remove_image_background
@@ -95,7 +95,7 @@ def _on_track_events_init(widget):
 )
 def track_events(
     image_selector: Image,
-    arcos_worker: FunctionWorker | None = None,
+    arcos_worker: Union[FunctionWorker, None] = None,
     eps: float = 1.5,
     epsPrev: float = 0,
     minClSz: int = 9,
