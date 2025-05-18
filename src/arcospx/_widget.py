@@ -32,8 +32,8 @@ def remove_background(
     image: Image,
     filter_type: Literal["gaussian", "median"] = "gaussian",
     size_0: int = 20,
-    size_1: int = 5,
-    size_2: int = 5,
+    size_1: int = 1,
+    size_2: int = 1,
     dims: str = "TXY",
     crop_time_axis: bool = False,
 ) -> FunctionWorker[LayerDataTuple]:
@@ -191,6 +191,7 @@ def _on_track_events_init(widget):
     widget.dims.changed.connect(_set_dims_as_text_label)
     widget.clustering_method.changed.connect(_on_clustering_method_changed)
     widget.linking_method.changed.connect(_on_linking_method_changed)
+    _set_dims_as_text_label(widget.dims.value)
 
 
 @magic_factory(
@@ -283,9 +284,9 @@ def track_events(
     downscale: int = 1,
     use_predictor: bool = False,
     remove_small_clusters: bool = True,
-    create_tracks_layer: bool = True,
+    create_tracks_layer: bool = False,
     create_lineage_map: bool = False,
-    dims: Literal["TXY", "TYX", "TZXY", "ZTYX", "XY", "ZYX"] = "TXY",
+    dims: Literal["TXY", "TYX", "TZXY", "ZTYX", "XY", "ZYX"] = "TYX",
 ) -> FunctionWorker[list[LayerDataTuple]]:
     if arcos_worker is not None and arcos_worker.is_running:
         arcos_worker.quit()
