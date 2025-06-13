@@ -1,0 +1,11 @@
+Requirement already satisfied: setuptools in c:\users\benig\documents\python_dev\arcos_px_pertzlab_branch\arcospx-napari\.tox\.package\lib\site-packages (80.9.0)
+Requirement already satisfied: wheel in c:\users\benig\documents\python_dev\arcos_px_pertzlab_branch\arcospx-napari\.tox\.package\lib\site-packages (0.45.1)
+Collecting setuptools_scm
+  Using cached setuptools_scm-8.3.1-py3-none-any.whl.metadata (7.0 kB)
+Collecting packaging>=20 (from setuptools_scm)
+  Using cached packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+Using cached setuptools_scm-8.3.1-py3-none-any.whl (43 kB)
+Using cached packaging-25.0-py3-none-any.whl (66 kB)
+Installing collected packages: packaging, setuptools_scm
+
+Successfully installed packaging-25.0 setuptools_scm-8.3.1
