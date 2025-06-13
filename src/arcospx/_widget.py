@@ -247,7 +247,7 @@ def _on_track_events_init(widget):
         "step": 0.0000001,
     },
     downscale={
-        "tooltip": "Downsampling factor for faster processing (>=1). Affects spatial parameters."
+        "tooltip": "Downsampling factor for faster processing (>=1). Affects spatial parameters and could yield different results.",
     },
     use_predictor={
         "tooltip": "Use motion prediction for better linking between frames."

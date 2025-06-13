@@ -1,7 +1,7 @@
 name: arcosPx-napari
 display_name: arcosPx
 # use 'hidden' to remove plugin from napari hub search results
-visibility: hidden
+visibility: public
 categories: ["Segmentation"]
 contributions:
   commands:
